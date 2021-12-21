@@ -63,7 +63,8 @@ plt.show()
 
 embed_key = np.random.randint(0, 2, (width, height))
 block_size = 8
-random_msg = np.random.randint(0, 2, (int(width / block_size), int(height / block_size)))
+block_num = min(width//block_size, height//block_size)
+random_msg = np.random.randint(0, 2, (width // block_size, height // block_size))
 
 # print("原图像二进制数据")
 # print(bit_img)
@@ -73,8 +74,8 @@ random_msg = np.random.randint(0, 2, (int(width / block_size), int(height / bloc
 # print(random_msg)
 
 # 嵌入信息
-for i in range(int(width / block_size)):
-    for j in range(int(height / block_size)):
+for i in range(block_num):
+    for j in range(block_num):
         if random_msg[i, j] == 0:
             for k1 in range(i * block_size, (i + 1) * block_size):
                 for k2 in range(j * block_size, (j + 1) * block_size):
