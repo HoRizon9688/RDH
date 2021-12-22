@@ -71,17 +71,19 @@ def xor_encrypt(encrypt_key, bit_img):
 
 
 np_img = open_img("test3.bmp")
+
 # 打印原图片
 plt.imshow(np_img, cmap="gray")
 plt.axis('off')
 plt.show()
+
 bit_img = img2bit_img(np_img)
 encrypt_key = encrypt_key_gen(np_img)
 encrypted_bit_img = xor_encrypt(encrypt_key, bit_img)
 encrypted_np_img = bit_img2img(encrypted_bit_img)
+
 # 打印异或加密后图片
 plt.imshow(encrypted_np_img, cmap="gray")
 plt.axis('off')
 plt.show()
-# print(encrypt_key)
-# print(encrypted_bit_img)
+
