@@ -17,5 +17,14 @@ import matplotlib.pyplot as plt
 width = 512
 height = 1024
 
-result = max(width//8, height//8)
+result = min(width//8, height//8)
 print(result)
+string = "Python"
+text = ''
+binary_converted = ' '.join(map(bin, bytearray(string, "utf-8"))).replace('0b', '')
+print("The Binary Represntation is:", binary_converted)
+print(len(binary_converted))
+asc2 = binary_converted.split(' ')
+for i in asc2:
+    text += chr(int(i, 2))
+print(text)
