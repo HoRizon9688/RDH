@@ -5,6 +5,20 @@ import matplotlib.pyplot as plt
 import re
 
 
+def encrypt_key_gen(np_img):
+    width = np_img.shape[1]
+    height = np_img.shape[0]
+    encrypt_key = np.random.randint(0, 2, (height, width, 8))
+    return encrypt_key
+
+
+def embed_key_gen(np_img):
+    width = np_img.shape[1]
+    height = np_img.shape[0]
+    embed_key = np.random.randint(0, 2, (height, width))
+    return embed_key
+
+
 def random_msg_gen(block_num):
     random_msg = np.random.randint(0, 2, (block_num, block_num))
     return random_msg
