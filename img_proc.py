@@ -98,8 +98,8 @@ def random_msg_embed(block_size, block_num, bit_img, bit_msg, embed_key):
 
 # 块恢复和嵌入信息提取
 def recover_extract_rand(block_size, block_num, bit_img, embed_key):
-    h0 = bit_img.copy()  # 将每个块中的S0集合翻转，S1不变
-    h1 = bit_img.copy()  # 将每个块中的S1集合翻转，S0不变
+    h0 = bit_img.copy()
+    h1 = bit_img.copy()
     recover_np_img = np.zeros((height, width), dtype=int)
     extract_msg = np.zeros((block_num, block_num), dtype=int)
 
@@ -124,8 +124,8 @@ def recover_extract_rand(block_size, block_num, bit_img, embed_key):
                             else:
                                 h1[k1, k2, k3] = 0
 
-    h0 = bit_img2img(h0)
-    h1 = bit_img2img(h1)
+    h0 = bit_img2img(h0)  # 将每个块中的S0集合翻转，S1不变
+    h1 = bit_img2img(h1)  # 将每个块中的S1集合翻转，S0不变
 
     for i in range(block_num):
         for j in range(block_num):
@@ -147,6 +147,16 @@ def recover_extract_rand(block_size, block_num, bit_img, embed_key):
                 extract_msg[i, j] = 1
 
     return recover_np_img, extract_msg
+
+
+def merge_recover_img(block_size, block_num, decrypt_np_img, recover_np_img):
+    merge_np_img = decrypt_np_img.copy()
+    for i in range(block_num):
+        for j in range(block_num):
+            for h in range(i * block_size, (i + 1) * block_size):
+                for w in range(j * block_size, (j + 1) * block_size):
+                    merge_np_img[h, w] = recover_np_img[h, w]
+    return merge_np_img
 
 
 # def msg_embed(block_size, block_num, bit_img, bit_msg, embed_key):
@@ -178,7 +188,7 @@ def recover_extract_rand(block_size, block_num, bit_img, embed_key):
 #     return bit_img
 
 
-width, height, np_img = open_img("test2.bmp")
+width, height, np_img = open_img("test3.bmp")
 block_size = 8
 block_num = min(height//block_size, width//block_size)
 msg_capacity = block_num * block_num
@@ -208,7 +218,7 @@ plt.show()
 embed_key = embed_key_gen(np_img)
 
 bit_msg = random_msg_gen(block_num)
-print(bit_msg)
+# print(bit_msg)
 # bit_msg = msg_gen("A")
 
 embed_bit_img = random_msg_embed(block_size, block_num, encrypted_bit_img, bit_msg, embed_key)
@@ -227,9 +237,17 @@ plt.imshow(decrypt_np_img, cmap="gray")
 plt.axis('off')
 plt.show()
 
-# 打印恢复后图片
 recover_np_img, extract_msg = recover_extract_rand(block_size, block_num, decrypt_bit_img, embed_key)
-print(extract_msg)
-plt.imshow(recover_np_img, cmap="gray")
+merge_np_img = merge_recover_img(block_size, block_num, decrypt_np_img, recover_np_img)
+
+# print(recover_np_img)
+# print(merge_np_img)
+# print((recover_np_img == merge_np_img).all())
+
+# 提取的嵌入信息
+# print(extract_msg)
+
+# 打印恢复后图片
+plt.imshow(merge_np_img, cmap="gray")
 plt.axis('off')
 plt.show()
