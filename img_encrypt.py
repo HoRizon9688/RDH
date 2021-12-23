@@ -70,10 +70,11 @@ random_msg = np.random.randint(0, 2, (block_num, block_num))
 
 # print("原图像二进制数据")
 # print(bit_img)
-print("隐藏密钥")
-print(embed_key)
-print("嵌入信息")
-print(random_msg)
+
+# print("隐藏密钥")
+# print(embed_key)
+# print("嵌入信息")
+# print(random_msg)
 
 # 嵌入信息
 for i in range(block_num):
@@ -99,6 +100,7 @@ for i in range(block_num):
 # print("嵌入后图片二进制数据")
 # print(bit_img)
 
+# 打印嵌入信息后图片
 np_img = bit_img2img(bit_img)
 plt.imshow(np_img, cmap="gray")
 plt.axis('off')
@@ -110,12 +112,14 @@ for i in range(height):
         for k in range(0, 8):
             bit_img[i, j, k] = bit_img[i, j, k] ^ encrypt_key[i, j, k]
 
+# 打印解密后图片
 np_img = bit_img2img(bit_img)
 plt.imshow(np_img, cmap="gray")
 plt.axis('off')
 plt.show()
-print("解密后")
-print(np_img)
+
+# print("解密后")
+# print(np_img)
 
 
 # 块恢复和嵌入信息提取
@@ -145,8 +149,8 @@ for i in range(block_num):
 
 H0 = bit_img2img(H0)
 H1 = bit_img2img(H1)
-print("H0\n", H0)
-print("H1\n", H1)
+# print("H0\n", H0)
+# print("H1\n", H1)
 
 recover_img = np.zeros((height, width), dtype=int)
 
@@ -166,7 +170,9 @@ for i in range(block_num):
             for h in range(i * block_size, (i + 1) * block_size):
                 for w in range(j * block_size, (j + 1) * block_size):
                     recover_img[h, w] = H1[h, w]
-print(recover_img)
+# print(recover_img)
+
+# 打印块恢复后图片
 plt.imshow(recover_img, cmap="gray")
 plt.axis('off')
 plt.show()
