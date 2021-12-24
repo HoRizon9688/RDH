@@ -32,7 +32,8 @@ from embed_extract import *
 #     return bit_img
 
 
-width, height, np_img = open_img("test3.bmp")
+width, height, np_img = open_img("test1.bmp")
+
 block_size = 8
 block_num = min(height//block_size, width//block_size)
 msg_capacity = block_num * block_num

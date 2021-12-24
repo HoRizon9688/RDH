@@ -5,6 +5,9 @@ import json
 import os
 import sys
 import time
+from img_process import *
+from msg_key_gen import *
+from embed_extract import *
 
 ip_port = ('127.0.0.1', 8888)
 buffer_size = 1024

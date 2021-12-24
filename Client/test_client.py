@@ -5,6 +5,9 @@ import json
 import os
 import sys
 import time
+from img_process import *
+from msg_key_gen import *
+from embed_extract import *
 
 ip_port = ('127.0.0.1', 8888)
 buffer_size = 1024
@@ -27,13 +30,25 @@ while True:
     if event == '上传':
         if values['file_src']:
             file_src = values['file_src']
-            # window.perform_long_operation(upload(client, file_src), 'upload_done')
             function = "upload"
             client.send(bytes(function, "utf-8"))
 
-            filesize_bytes = os.path.getsize(file_src)
-            file_name = os.path.basename(file_src)
+            # 返回图片加密后的np数组
+            width, height, np_img = open_img(file_src)
+            bit_img = img2bit_img(np_img)
+            encrypt_key = encrypt_key_gen(np_img)
+            encrypted_bit_img = xor_encrypt(encrypt_key, bit_img)
+            encrypted_np_img = bit_img2img(encrypted_bit_img)
 
+            # 获取原图片名
+            file_name = os.path.basename(file_src)
+            # 加密后图片名
+            encrypted_file_name = "encrypted_" + file_name
+            # 加密原图片并保存到client目录下
+            np_img_save(encrypted_np_img, encrypted_file_name)
+            filesize_bytes = os.path.getsize(file_path + encrypted_file_name)
+
+            # 仍按照原文件名发送
             dict_header = {"file_name": file_name, "file_size": filesize_bytes}
 
             header = json.dumps(dict_header)
@@ -42,7 +57,7 @@ while True:
             client.send(len_header)
             client.send(header.encode('utf-8'))
 
-            with open(file_src, 'rb') as f:
+            with open(file_path + encrypted_file_name, 'rb') as f:
                 data = f.read()
                 client.sendall(data)
                 f.close()

@@ -16,6 +16,14 @@ def open_img(img_name):
     return width, height, np_img
 
 
+# 将np数组表示的灰度值转换为图片保存
+def np_img_save(np_img, img_name):
+    rgb_img = Image.fromarray(np_img).convert('RGB')
+    rgb_img.save(img_name)
+    gray_img = Image.open(img_name).convert('L')
+    gray_img.save(img_name)
+
+
 # 将十进制np数组表示的图片转换为二进制
 def img2bit_img(np_img):
     width = np_img.shape[1]
