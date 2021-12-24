@@ -18,18 +18,6 @@ server.bind(ip_port)                # 绑定服务地址
 server.listen(5)                    # 监听连接请求
 print('启动socket服务，等待客户端连接...')
 
-# quit_flag = 0
-
-# layout = [[sg.Button('查看服务器文件')]]
-#
-# window = sg.Window('Server', layout)
-#
-# while True:
-#     event, values = window.read()
-#     if event == sg.WINDOW_CLOSED:
-#         print("退出系统")
-#         server.close()
-#         break
 
 while True:
     client_sock, address = server.accept()
@@ -64,11 +52,36 @@ while True:
                     recv_msg = client_sock.recv(filesize_bytes - recv_len)
                     f.write(recv_msg)
                     f.close()
-                    print("文件接受完毕")
+                    print("文件接受完毕，开始嵌入信息...")
                     break
-
+            # 接受完毕后发送完成信息给client
             finish_flag = "1"
             client_sock.send(bytes(finish_flag, "utf-8"))
+
+            # 打开接受的图片获取图片有关信息
+            width, height, np_img = open_img(file_name)
+            block_size = 8
+            block_num = min(height // block_size, width // block_size)
+            msg_capacity = block_num * block_num
+            print("width:" + str(width))
+            print("height:" + str(height))
+            print("block_size:", block_size)
+            print("block_num:", block_num)
+            print("msg_capacity:", msg_capacity)
+
+            # 生成嵌入密钥和随机信息
+            embed_key = embed_key_gen(np_img)
+            bit_msg = random_msg_gen(block_num)
+
+            # 嵌入信息并返回嵌入后的np数组
+            encrypted_bit_img = img2bit_img(np_img)
+            embed_bit_img = random_msg_embed(block_size, block_num, encrypted_bit_img, bit_msg, embed_key)
+            embed_np_img = bit_img2img(embed_bit_img)
+
+            # 将嵌入后的图片保存到server目录下
+            embedded_file_name = "embedded_" + file_name
+            np_img_save(embed_np_img, embedded_file_name)
+            print("执行完毕")
 
         elif fun_select == "download":
             print("Start " + fun_select)
