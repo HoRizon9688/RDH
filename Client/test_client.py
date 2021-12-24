@@ -15,10 +15,11 @@ file_path = "C:/Users/HoRizon/PycharmProjects/RDH/Client/"
 
 client = socket.socket()  # 创建套接字
 client.connect(ip_port)  # 连接服务器
+print("连接成功")
 
 layout = [[sg.Text('Choose the img')],
           [sg.Text('Source for Folders', size=(15, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
-          [sg.Button('上传'), sg.Button('下载')]]
+          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件')]]
 window = sg.Window('Client', layout)
 
 while True:
@@ -66,6 +67,8 @@ while True:
             if finish_flag == "1":
                 print("文件上传成功")
 
+            # os.remove(file_path + encrypted_file_name)
+
     if event == "下载":
         if values['file_src']:
             file_name = values['file_src']
@@ -101,5 +104,10 @@ while True:
                     break
             finish_flag = "1"
             client.send(bytes(finish_flag, "utf-8"))
+
+    # if event == "查看服务器文件":
+    #     function = "view"
+    #     client.send(bytes(function, "utf-8"))
+
 
 window.close()
