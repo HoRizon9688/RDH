@@ -19,7 +19,7 @@ print("连接成功")
 
 layout = [[sg.Text('Choose the img')],
           [sg.Text('Source for Folders', size=(15, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
-          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件')]]
+          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件'), sg.Button('获取嵌入密钥')]]
 window = sg.Window('Client', layout)
 
 while True:
@@ -37,7 +37,9 @@ while True:
             # 返回图片加密后的np数组
             width, height, np_img = open_img(file_src)
             bit_img = img2bit_img(np_img)
+            # 生成加密密钥并保存
             encrypt_key = encrypt_key_gen(np_img)
+
             encrypted_bit_img = xor_encrypt(encrypt_key, bit_img)
             encrypted_np_img = bit_img2img(encrypted_bit_img)
 
@@ -49,20 +51,20 @@ while True:
             np_img_save(encrypted_np_img, encrypted_file_name)
             filesize_bytes = os.path.getsize(file_path + encrypted_file_name)
 
-            # 仍按照原文件名发送
+            # 创建字典用于报头，仍按照原文件名发送
             dict_header = {"file_name": file_name, "file_size": filesize_bytes}
-
+            # 将字典转为JSON字符，再将字符串的长度打包
             header = json.dumps(dict_header)
             len_header = struct.pack('i', len(header))
-
+            # 先发送报头长度，然后发送报头内容
             client.send(len_header)
             client.send(header.encode('utf-8'))
-
+            # 发送真实文件
             with open(file_path + encrypted_file_name, 'rb') as f:
                 data = f.read()
                 client.sendall(data)
                 f.close()
-
+            # 服务器若接受完文件会发送信号，客户端接收
             finish_flag = client.recv(buffer_size).decode('utf-8')
             if finish_flag == "1":
                 print("文件上传成功")
@@ -73,41 +75,64 @@ while True:
         if values['file_src']:
             file_name = values['file_src']
             function = "download"
+            # 发送下载指令给server同时指定下载的文件名
             client.send(bytes(function, "utf-8"))
-
             client.send(bytes(file_name, "utf-8"))
-
+            # 接受并解析报头的长度，接受报头的内容
             header_struct = client.recv(4)
             header_len = struct.unpack('i', header_struct)[0]
             data = client.recv(header_len)
-
+            # 解析报头字典
             dict_header = json.loads(data.decode("utf-8"))
             filesize_bytes = dict_header["file_size"]
             file_name = dict_header["file_name"]
-
+            # 接受真实的文件内容
             recv_len = 0
             recv_mesg = b''
-
             file_src = file_path + file_name
-            f = open(file_src, "wb")
 
+            f = open(file_src, "wb")
             while recv_len < filesize_bytes:
-                if filesize_bytes - recv_len > buffer_size:
+                if filesize_bytes - recv_len > buffer_size:  # 未上传的文件数据大于最大传输数据
                     recv_mesg = client.recv(buffer_size)
                     f.write(recv_mesg)
                     recv_len += len(recv_mesg)
-                else:
+                else:  # 需要传输的文件数据小于最大传输数据大小
                     recv_mesg = client.recv(filesize_bytes - recv_len)
                     f.write(recv_mesg)
                     f.close()
                     print("文件下载完毕")
                     break
+            # 向服务器发送下载完毕信号
             finish_flag = "1"
             client.send(bytes(finish_flag, "utf-8"))
 
-    # if event == "查看服务器文件":
-    #     function = "view"
-    #     client.send(bytes(function, "utf-8"))
+            width, height, np_img = open_img(file_name)
+            block_size = 8
+            block_num = min(height // block_size, width // block_size)
+            msg_capacity = block_num * block_num
+
+            # 加载加密密钥和嵌入密钥
+            encrypt_key = key_load("encrypt_key.npy")
+            embed_key = key_load("embed_key.npy")
+
+            embed_bit_img = img2bit_img(np_img)
+            decrypt_bit_img = xor_encrypt(encrypt_key, embed_bit_img)
+            decrypt_np_img = bit_img2img(decrypt_bit_img)
+
+            recover_np_img, extract_msg = recover_extract_rand(block_size, block_num, decrypt_bit_img, embed_key)
+            merge_np_img = merge_recover_img(block_size, block_num, decrypt_np_img, recover_np_img)
+
+            np_img_save(merge_np_img, file_name)
+            print("完成解密与嵌入信息提取")
+
+    if event == "查看服务器文件":
+        function = "view"
+        client.send(bytes(function, "utf-8"))
+
+    if event == "获取嵌入密钥":
+        function = "get_embed_key"
+        client.send(bytes(function, "utf-8"))
 
 
 window.close()
