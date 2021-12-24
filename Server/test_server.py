@@ -6,6 +6,9 @@ import os
 import threading
 import sys
 import time
+
+import numpy as np
+
 from img_process import *
 from msg_key_gen import *
 from embed_extract import *
@@ -17,6 +20,7 @@ def link_handler(link, client):
         fun_select = client_sock.recv(buffer_size).decode("utf-8")
 
         if fun_select == 'upload':
+            print("----------------------------------------------")
             print("Start " + fun_select)
             header_struct = client_sock.recv(4)
             header_len = struct.unpack('i', header_struct)[0]
@@ -49,18 +53,22 @@ def link_handler(link, client):
 
             # 打开接受的图片获取图片有关信息
             width, height, np_img = open_img(file_name)
-            block_size = 8
+            block_size = 32
             block_num = min(height // block_size, width // block_size)
             msg_capacity = block_num * block_num
-            print("width:" + str(width), end=" ")
-            print("height:" + str(height))
-            print("block_size:", block_size, end=" ")
-            print("block_num:", block_num, end=" ")
+            print("width:", width, end="  ")
+            print("height:", height)
+            print("block_size:", block_size, end="  ")
+            print("block_num:", block_num, end="  ")
             print("msg_capacity:", msg_capacity)
 
             # 生成嵌入密钥和随机信息
             embed_key = embed_key_gen(np_img)
             bit_msg = random_msg_gen(block_num)
+
+            # 保存嵌入的存入信息
+            random_msg_name = file_name.replace('.bmp', '.npy')
+            np.save(random_msg_name, bit_msg)
 
             # 嵌入信息并返回嵌入后的np数组
             encrypted_bit_img = img2bit_img(np_img)
@@ -71,8 +79,10 @@ def link_handler(link, client):
             # embedded_file_name = "embedded_" + file_name
             np_img_save(embed_np_img, file_name)
             print("执行完毕")
+            print("----------------------------------------------\n")
 
         elif fun_select == "download":
+            print("----------------------------------------------")
             print("Start " + fun_select)
             file_name = client_sock.recv(buffer_size).decode("utf-8")
             file_src = file_path + file_name
@@ -95,6 +105,31 @@ def link_handler(link, client):
             finish_flag = client_sock.recv(buffer_size).decode("utf-8")
             if finish_flag == "1":
                 print("用户下载完毕")
+                print("----------------------------------------------\n")
+
+        elif fun_select == "get_embed_key":
+            print("----------------------------------------------")
+            print("Start send embed_key")
+            file_src = file_path + "embed_key.npy"
+            filesize_bytes = os.path.getsize(file_src)
+            dict_header = {"file_name": "embed_key.npy", "file_size": filesize_bytes}
+
+            header = json.dumps(dict_header)
+            len_header = struct.pack('i', len(header))
+
+            client_sock.send(len_header)
+            client_sock.send(header.encode("utf-8"))
+
+            with open(file_src, "rb") as f:
+                data = f.read()
+                client_sock.sendall(data)
+                f.close()
+
+            finish_flag = client_sock.recv(buffer_size).decode("utf-8")
+            if finish_flag == "1":
+                print("嵌入密钥传输完毕")
+                print("----------------------------------------------\n")
+
         else:
             print(client[0] + ":" + str(client[1]) + " 用户退出")
             client_sock.close()
