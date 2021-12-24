@@ -63,7 +63,7 @@ def link_handler(link, client):
             print("msg_capacity:", msg_capacity)
 
             # 生成嵌入密钥和随机信息
-            embed_key = embed_key_gen(np_img)
+            embed_key = embed_key_gen(np_img, file_name)
             bit_msg = random_msg_gen(block_num)
 
             # 保存嵌入的存入信息
@@ -110,9 +110,10 @@ def link_handler(link, client):
         elif fun_select == "get_embed_key":
             print("----------------------------------------------")
             print("Start send embed_key")
-            file_src = file_path + "embed_key.npy"
+            embed_key_name = client_sock.recv(buffer_size).decode("utf-8")
+            file_src = file_path + embed_key_name + "_embed_key.npy"
             filesize_bytes = os.path.getsize(file_src)
-            dict_header = {"file_name": "embed_key.npy", "file_size": filesize_bytes}
+            dict_header = {"file_name": embed_key_name + "_embed_key.npy", "file_size": filesize_bytes}
 
             header = json.dumps(dict_header)
             len_header = struct.pack('i', len(header))

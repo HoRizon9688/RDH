@@ -5,24 +5,26 @@ import matplotlib.pyplot as plt
 import re
 
 
-def encrypt_key_gen(np_img):
+def encrypt_key_gen(np_img, file_name):
     width = np_img.shape[1]
     height = np_img.shape[0]
     encrypt_key = np.random.randint(0, 2, (height, width, 8))
-    np.save("encrypt_key.npy", encrypt_key)
+    key_name = file_name.replace('.bmp', '') + "_encrypt_key.npy"
+    np.save(key_name, encrypt_key)
     return encrypt_key
 
 
-def embed_key_gen(np_img):
+def embed_key_gen(np_img, file_name):
     width = np_img.shape[1]
     height = np_img.shape[0]
     embed_key = np.random.randint(0, 2, (height, width))
-    np.save("embed_key.npy", embed_key)
+    key_name = file_name.replace('.bmp', '') + "_embed_key.npy"
+    np.save(key_name, embed_key)
     return embed_key
 
 
-def key_load(key_type):
-    key = np.load(key_type)
+def key_load(key_name):
+    key = np.load(key_name)
     return key
 
 

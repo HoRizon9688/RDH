@@ -35,17 +35,17 @@ while True:
             function = "upload"
             client.send(bytes(function, "utf-8"))
 
+            # 获取原图片名
+            file_name = os.path.basename(file_src)
             # 返回图片加密后的np数组
             width, height, np_img = open_img(file_src)
             bit_img = img2bit_img(np_img)
             # 生成加密密钥并保存
-            encrypt_key = encrypt_key_gen(np_img)
+            encrypt_key = encrypt_key_gen(np_img, file_name)
 
             encrypted_bit_img = xor_encrypt(encrypt_key, bit_img)
             encrypted_np_img = bit_img2img(encrypted_bit_img)
 
-            # 获取原图片名
-            file_name = os.path.basename(file_src)
             # 加密后图片名
             encrypted_file_name = "encrypted_" + file_name
             # 加密原图片并保存到client目录下
@@ -70,11 +70,15 @@ while True:
             if finish_flag == "1":
                 print("文件上传成功")
 
-            # os.remove(file_path + encrypted_file_name)
+            os.remove(file_path + encrypted_file_name)
 
     if event == "下载":
         if values['file_src']:
             file_name = values['file_src']
+
+            encrypt_key_name = file_name.replace('.bmp', '_encrypt_key.npy')
+            embed_key_name = file_name.replace('.bmp', '_embed_key.npy')
+
             window['file_src'].update('')
             function = "download"
             # 发送下载指令给server同时指定下载的文件名
@@ -115,8 +119,8 @@ while True:
             msg_capacity = block_num * block_num
 
             # 加载加密密钥和嵌入密钥
-            encrypt_key = key_load("encrypt_key.npy")
-            embed_key = key_load("embed_key.npy")
+            encrypt_key = key_load(encrypt_key_name)
+            embed_key = key_load(embed_key_name)
 
             embed_bit_img = img2bit_img(np_img)
             decrypt_bit_img = xor_encrypt(encrypt_key, embed_bit_img)
@@ -135,35 +139,37 @@ while True:
         client.send(bytes(function, "utf-8"))
 
     if event == "获取嵌入密钥":
-        function = "get_embed_key"
-        client.send(bytes(function, "utf-8"))
+        if values['file_src']:
+            function = "get_embed_key"
+            client.send(bytes(function, "utf-8"))
+            embed_key_name = values['file_src'].replace('.bmp', '')
+            client.send(bytes(embed_key_name, "utf-8"))
+            header_struct = client.recv(4)
+            header_len = struct.unpack('i', header_struct)[0]
+            data = client.recv(header_len)
+            dict_header = json.loads(data.decode("utf-8"))
+            filesize_bytes = dict_header["file_size"]
+            file_name = dict_header["file_name"]
+            # 接受真实的文件内容
+            recv_len = 0
+            recv_mesg = b''
+            file_src = file_path + file_name
 
-        header_struct = client.recv(4)
-        header_len = struct.unpack('i', header_struct)[0]
-        data = client.recv(header_len)
-        dict_header = json.loads(data.decode("utf-8"))
-        filesize_bytes = dict_header["file_size"]
-        file_name = dict_header["file_name"]
-        # 接受真实的文件内容
-        recv_len = 0
-        recv_mesg = b''
-        file_src = file_path + file_name
-
-        f = open(file_src, "wb")
-        while recv_len < filesize_bytes:
-            if filesize_bytes - recv_len > buffer_size:  # 未上传的文件数据大于最大传输数据
-                recv_mesg = client.recv(buffer_size)
-                f.write(recv_mesg)
-                recv_len += len(recv_mesg)
-            else:  # 需要传输的文件数据小于最大传输数据大小
-                recv_mesg = client.recv(filesize_bytes - recv_len)
-                f.write(recv_mesg)
-                f.close()
-                print("成功获取嵌入密钥")
-                break
-        # 向服务器发送下载完毕信号
-        finish_flag = "1"
-        client.send(bytes(finish_flag, "utf-8"))
+            f = open(file_src, "wb")
+            while recv_len < filesize_bytes:
+                if filesize_bytes - recv_len > buffer_size:  # 未上传的文件数据大于最大传输数据
+                    recv_mesg = client.recv(buffer_size)
+                    f.write(recv_mesg)
+                    recv_len += len(recv_mesg)
+                else:  # 需要传输的文件数据小于最大传输数据大小
+                    recv_mesg = client.recv(filesize_bytes - recv_len)
+                    f.write(recv_mesg)
+                    f.close()
+                    print("成功获取嵌入密钥")
+                    break
+            # 向服务器发送下载完毕信号
+            finish_flag = "1"
+            client.send(bytes(finish_flag, "utf-8"))
 
 
 window.close()
