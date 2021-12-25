@@ -146,7 +146,6 @@ while True:
             print(file)
         print("----------------------------------------------\n")
 
-
         finish_flag = "1"
         client.send(bytes(finish_flag, "utf-8"))
 

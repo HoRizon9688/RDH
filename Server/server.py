@@ -8,8 +8,6 @@ from msg_key_gen import *
 from embed_extract import *
 
 
-
-
 def link_handler(link, client):
     print("服务器开始接收来自[%s:%s]的请求...." % (client[0], client[1]))
     while True:
@@ -110,16 +108,20 @@ def link_handler(link, client):
             for file in dir_file:
                 if file.endswith(".bmp"):
                     bmp_file.append(file)
+            if bmp_file:
+                send_data = ""
+                for file in bmp_file:
+                    send_data += file + "\n"
 
-            send_data = ""
-            for file in bmp_file:
-                send_data += file + "\n"
+                client_sock.send(bytes(send_data, "utf-8"))
 
-            client_sock.send(bytes(send_data, "utf-8"))
-
-            finish_flag = client_sock.recv(buffer_size).decode("utf-8")
-            if finish_flag == "1":
-                print("成功发送")
+                finish_flag = client_sock.recv(buffer_size).decode("utf-8")
+                if finish_flag == "1":
+                    print("成功发送")
+                    print("----------------------------------------------\n")
+            else:
+                client_sock.send(bytes("未上传图片", "utf-8"))
+                print("客户端未上传图片")
                 print("----------------------------------------------\n")
 
         elif fun_select == "get_embed_key":
