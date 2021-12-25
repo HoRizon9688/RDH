@@ -3,35 +3,6 @@ from msg_key_gen import *
 from embed_extract import *
 
 
-# def msg_embed(block_size, block_num, bit_img, bit_msg, embed_key):
-#     count = 0
-#     msg_len = len(bit_msg)
-#     print("msg_len:", msg_len)
-#     while count < msg_len:
-#         for i in range(block_num):
-#             for j in range(block_num):
-#                 if bit_msg[count] == '0':
-#                     for k1 in range(i * block_size, (i + 1) * block_size):
-#                         for k2 in range(j * block_size, (j + 1) * block_size):
-#                             if embed_key[k1, k2] == 0:
-#                                 for k3 in range(3):  # 翻转后三位
-#                                     if bit_img[k1, k2, k3] == 0:
-#                                         bit_img[k1, k2, k3] = 1
-#                                     else:
-#                                         bit_img[k1, k2, k3] = 0
-#                 else:
-#                     for k1 in range(i * block_size, (i + 1) * block_size):
-#                         for k2 in range(j * block_size, (j + 1) * block_size):
-#                             if embed_key[k1, k2] == 1:
-#                                 for k3 in range(3):  # 翻转后三位
-#                                     if bit_img[k1, k2, k3] == 0:
-#                                         bit_img[k1, k2, k3] = 1
-#                                     else:
-#                                         bit_img[k1, k2, k3] = 0
-#         count += 1
-#     return bit_img
-
-
 width, height, np_img = open_img("test1.bmp")
 
 block_size = 8

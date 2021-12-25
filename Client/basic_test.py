@@ -1,7 +1,7 @@
 from img_process import *
 from msg_key_gen import *
 from embed_extract import *
-
+import os
 
 def np_img_save(np_img, img_name):
     rgb_img = Image.fromarray(np_img).convert('RGB')
@@ -28,14 +28,27 @@ def msg_read(extract_msg_name):
     return msg
 
 
-# width, height, np_img = open_img("test1.bmp")
-# encrypt_key = encrypt_key_gen(np_img)
-
-# encrypt_key = key_load("encrypt_key.npy")
-# print(encrypt_key)
+def get_bmp_file(file_path):
+    dir_file = os.listdir(file_path)
+    bmp_file = []
+    for file in dir_file:
+        if file.endswith(".bmp"):
+            bmp_file.append(file)
+    return bmp_file
 
 # 判断客户端提取的信息服务器嵌入的信息是否相等
-server_msg = msg_read("test.npy")
-client_msg = msg_read("server_test.npy")
+# server_msg = msg_read("test.npy")
+# client_msg = msg_read("server_test.npy")
+# print((server_msg == client_msg).all())
 
-print((server_msg == client_msg).all())
+
+# dir_file = os.listdir('./')
+# bmp_file = []
+# print(dir_file)
+# for file in dir_file:
+#     if file.endswith(".bmp"):
+#         # print(os.path.join(file))
+#         bmp_file.append(file)
+# print(bmp_file)
+
+print(get_bmp_file("C:/Users/HoRizon/PycharmProjects/RDH/Server/"))

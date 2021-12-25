@@ -94,18 +94,18 @@ while True:
             file_name = dict_header["file_name"]
             # 接受真实的文件内容
             recv_len = 0
-            recv_mesg = b''
+            recv_msg = b''
             file_src = file_path + file_name
 
             f = open(file_src, "wb")
             while recv_len < filesize_bytes:
-                if filesize_bytes - recv_len > buffer_size:  # 未上传的文件数据大于最大传输数据
-                    recv_mesg = client.recv(buffer_size)
-                    f.write(recv_mesg)
-                    recv_len += len(recv_mesg)
-                else:  # 需要传输的文件数据小于最大传输数据大小
-                    recv_mesg = client.recv(filesize_bytes - recv_len)
-                    f.write(recv_mesg)
+                if filesize_bytes - recv_len > buffer_size:
+                    recv_msg = client.recv(buffer_size)
+                    f.write(recv_msg)
+                    recv_len += len(recv_msg)
+                else:
+                    recv_msg = client.recv(filesize_bytes - recv_len)
+                    f.write(recv_msg)
                     f.close()
                     print("文件下载完毕")
                     break
@@ -135,8 +135,9 @@ while True:
             print("完成解密与嵌入信息提取")
 
     if event == "查看服务器文件":
-        function = "view"
+        function = "view_file"
         client.send(bytes(function, "utf-8"))
+
 
     if event == "获取嵌入密钥":
         if values['file_src']:
@@ -152,24 +153,23 @@ while True:
             file_name = dict_header["file_name"]
             # 接受真实的文件内容
             recv_len = 0
-            recv_mesg = b''
+            recv_msg = b''
             file_src = file_path + file_name
 
             f = open(file_src, "wb")
             while recv_len < filesize_bytes:
-                if filesize_bytes - recv_len > buffer_size:  # 未上传的文件数据大于最大传输数据
-                    recv_mesg = client.recv(buffer_size)
-                    f.write(recv_mesg)
-                    recv_len += len(recv_mesg)
-                else:  # 需要传输的文件数据小于最大传输数据大小
-                    recv_mesg = client.recv(filesize_bytes - recv_len)
-                    f.write(recv_mesg)
+                if filesize_bytes - recv_len > buffer_size:
+                    recv_msg = client.recv(buffer_size)
+                    f.write(recv_msg)
+                    recv_len += len(recv_msg)
+                else:
+                    recv_msg = client.recv(filesize_bytes - recv_len)
+                    f.write(recv_msg)
                     f.close()
                     print("成功获取嵌入密钥")
                     break
             # 向服务器发送下载完毕信号
             finish_flag = "1"
             client.send(bytes(finish_flag, "utf-8"))
-
 
 window.close()
