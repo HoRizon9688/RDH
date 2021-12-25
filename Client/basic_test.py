@@ -1,6 +1,5 @@
-from img_process import *
-from msg_key_gen import *
-from embed_extract import *
+from Utils.msg_key_gen import *
+from Utils.embed_extract import *
 import os
 
 def np_img_save(np_img, img_name):

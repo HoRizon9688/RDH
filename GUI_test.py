@@ -1,27 +1,14 @@
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 
-"""
-    Simultaneous PySimpleGUI Window AND a Matplotlib Interactive Window
-    A number of people have requested the ability to run a normal PySimpleGUI window that
-    launches a MatplotLib window that is interactive with the usual Matplotlib controls.
-    It turns out to be a rather simple thing to do.  The secret is to add parameter block=False to plt.show()
-"""
-
-def draw_plot():
-    plt.plot([0.1, 0.2, 0.5, 0.7])
-    plt.show(block=False)
-
-layout = [[sg.Button('Plot'), sg.Cancel(), sg.Button('Popup')]]
-
-window = sg.Window('Have some Matplotlib....', layout)
+layout = [[sg.Text('Choose the img')],
+          [sg.Text('Source for Folders', size=(15, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
+          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件'), sg.Button('获取嵌入密钥')],
+          [sg.Output(key="-Output-", size=(80, 20))]]
+window = sg.Window('Client', layout)
 
 while True:
     event, values = window.read()
-    if event in (sg.WIN_CLOSED, 'Cancel'):
+    if event == sg.WINDOW_CLOSED:
+        print("退出系统")
         break
-    elif event == 'Plot':
-        draw_plot()
-    elif event == 'Popup':
-        sg.popup('Yes, your application is still running')
-window.close()

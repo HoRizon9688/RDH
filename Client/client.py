@@ -2,9 +2,7 @@ import socket
 import PySimpleGUI as sg
 import struct
 import json
-import os
-import sys
-import time
+
 from img_process import *
 from msg_key_gen import *
 from embed_extract import *
@@ -19,7 +17,9 @@ print("连接成功")
 
 layout = [[sg.Text('Choose the img')],
           [sg.Text('Source for Folders', size=(15, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
-          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件'), sg.Button('获取嵌入密钥')]]
+          [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件'), sg.Button('获取嵌入密钥')],
+          [sg.Output(key="-Output-", size=(80, 20))]]
+
 window = sg.Window('Client', layout)
 
 while True:
@@ -140,14 +140,15 @@ while True:
         client.send(bytes(function, "utf-8"))
 
         response = client.recv(buffer_size).decode("utf-8")
+        bmp_file = response.splitlines()
+        print("\n----------------------------------------------")
+        for file in bmp_file:
+            print(file)
+        print("----------------------------------------------\n")
 
-        print(response)
 
         finish_flag = "1"
         client.send(bytes(finish_flag, "utf-8"))
-
-
-
 
     if event == "获取嵌入密钥":
         if values['file_src']:

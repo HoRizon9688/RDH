@@ -1,17 +1,13 @@
-import PySimpleGUI as sg
 import socket
 import struct
 import json
-import os
 import threading
-import sys
-import time
-
-import numpy as np
 
 from img_process import *
 from msg_key_gen import *
 from embed_extract import *
+
+
 
 
 def link_handler(link, client):
