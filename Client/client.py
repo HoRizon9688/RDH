@@ -26,6 +26,7 @@ while True:
     event, values = window.read()
     if event == sg.WINDOW_CLOSED:
         print("退出系统")
+        client.send(bytes("exit", "utf-8"))
         client.close()
         break
     if event == '上传':
@@ -137,6 +138,15 @@ while True:
     if event == "查看服务器文件":
         function = "view_file"
         client.send(bytes(function, "utf-8"))
+
+        response = client.recv(buffer_size).decode("utf-8")
+
+        print(response)
+
+        finish_flag = "1"
+        client.send(bytes(finish_flag, "utf-8"))
+
+
 
 
     if event == "获取嵌入密钥":

@@ -107,6 +107,25 @@ def link_handler(link, client):
                 print("用户下载完毕")
                 print("----------------------------------------------\n")
 
+        elif fun_select == "view_file":
+            print("----------------------------------------------")
+            dir_file = os.listdir(file_path)
+            bmp_file = []
+            for file in dir_file:
+                if file.endswith(".bmp"):
+                    bmp_file.append(file)
+
+            send_data = ""
+            for file in bmp_file:
+                send_data += file + "\n"
+
+            client_sock.send(bytes(send_data, "utf-8"))
+
+            finish_flag = client_sock.recv(buffer_size).decode("utf-8")
+            if finish_flag == "1":
+                print("成功发送")
+                print("----------------------------------------------\n")
+
         elif fun_select == "get_embed_key":
             print("----------------------------------------------")
             print("Start send embed_key")
@@ -131,7 +150,7 @@ def link_handler(link, client):
                 print("嵌入密钥传输完毕")
                 print("----------------------------------------------\n")
 
-        else:
+        elif fun_select == "exit":
             print(client[0] + ":" + str(client[1]) + " 用户退出")
             client_sock.close()
             break
