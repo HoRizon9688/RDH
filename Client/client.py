@@ -80,6 +80,14 @@ while True:
             encrypt_key_name = file_name.replace('.bmp', '_encrypt_key.npy')
             embed_key_name = file_name.replace('.bmp', '_embed_key.npy')
 
+            # 加载加密密钥和嵌入密钥
+            encrypt_key = key_load(encrypt_key_name)
+            try:
+                embed_key = key_load(embed_key_name)
+            except:
+                print("未找到图片对应的嵌入密钥,请先获取嵌入密钥！")
+                continue
+
             window['file_src'].update('')
             function = "download"
             # 发送下载指令给server同时指定下载的文件名
@@ -119,10 +127,7 @@ while True:
             block_num = min(height // block_size, width // block_size)
             msg_capacity = block_num * block_num
 
-            # 加载加密密钥和嵌入密钥
-            encrypt_key = key_load(encrypt_key_name)
-            embed_key = key_load(embed_key_name)
-
+            # 图片还原&信息提取
             embed_bit_img = img2bit_img(np_img)
             decrypt_bit_img = xor_encrypt(encrypt_key, embed_bit_img)
             decrypt_np_img = bit_img2img(decrypt_bit_img)

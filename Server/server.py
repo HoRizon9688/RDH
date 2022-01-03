@@ -117,7 +117,7 @@ def link_handler(link, client):
 
                 finish_flag = client_sock.recv(buffer_size).decode("utf-8")
                 if finish_flag == "1":
-                    print("成功发送")
+                    print("成功发送已上传图片列表")
                     print("----------------------------------------------\n")
             else:
                 client_sock.send(bytes("未上传图片", "utf-8"))
