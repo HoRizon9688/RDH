@@ -15,10 +15,10 @@ client = socket.socket()  # 创建套接字
 client.connect(ip_port)  # 连接服务器
 print("连接成功")
 
-layout = [[sg.Text('Choose the img')],
-          [sg.Text('Source for Folders', size=(15, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
+layout = [[sg.Text('请选择图片')],
+          [sg.Text('图片名', size=(6, 1)), sg.InputText(key='file_src'), sg.FileBrowse()],
           [sg.Button('上传'), sg.Button('下载'), sg.Button('查看服务器文件'), sg.Button('获取嵌入密钥')],
-          [sg.Output(key="-Output-", size=(80, 20))]]
+          [sg.Output(key="-Output-", size=(70, 20))]]
 
 window = sg.Window('Client', layout)
 
